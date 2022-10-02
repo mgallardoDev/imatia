@@ -13,6 +13,7 @@ const {
   createCoutry,
   updateCountry,
   deleteCountry,
+  getCountryByIso,
 } = require("../controllers/country.controller");
 const { Country } = require("../models");
 
@@ -106,18 +107,15 @@ router.get("/", [validateJWT, redisCache('countryList')], getCountries);
  *                  payload:
  *                    type: object
  *                    properties:
- *                      country:
- *                        type: object
- *                        properties:
- *                          country:
- *                            type: object
- *                            properties:
- *                             iso: 
- *                              type: string
- *                             countryname: 
- *                              type: string
- *                             _id:
- *                              type: string
+ *                     country:
+ *                       type: object
+ *                       properties:
+ *                        iso: 
+ *                         type: string
+ *                        countryname: 
+ *                         type: string
+ *                        _id:
+ *                         type: string
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
@@ -130,6 +128,59 @@ router.get(
   ],
   getCountryById
 );
+
+/**
+ * @swagger
+ *  /api/country/iso/{iso}:
+ *    get:
+ *      summary: buscar un país, por el código  ISO 3166-1 alfa-2
+ *      parameters:
+ *       - in: path
+ *         name: iso   # Note the name is the same as in the path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: ES
+ *         description: Código ISO 3166-1 alfa-2 del pais a buscar
+ *      security:
+ *        - bearerAuth: []
+ *      responses:
+ *        '200':
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  status:
+ *                    type: string
+ *                  msg:
+ *                    type: string  
+ *                  payload:
+ *                    type: object
+ *                    properties:
+ *                      country:
+ *                        type: object
+ *                        properties:
+ *                         iso: 
+ *                          type: string
+ *                         countryname: 
+ *                          type: string
+ *                         _id:
+ *                          type: string
+ *        '401':
+ *          $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get(
+  "/iso/:iso",
+  [
+    validateJWT,
+    check(
+      "iso",
+      "El código ISO 3166-1 alfa-2 del país tiene que estar compuesto por dos caracteres alfabéticos.").isLength({min:2, max:2}),
+    validate
+  ],
+  getCountryByIso
+)
 
 /**
  * @swagger

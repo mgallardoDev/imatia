@@ -1,11 +1,10 @@
-const path = require("path");
 const express = require("express");
 
 
 const { paths } = require("../config/paths");
-const { AuthRoutes, CountryRoutes } = require("../routes");
+const { AuthRoutes, CountryRoutes, MarketRoutes } = require("../routes");
 const { dbConection } = require("../helpers/mongoDB.controller");
-const { swaggerOptions, swaggerDocs } = require("../config/swagger");
+const {  swaggerDocs } = require("../config/swagger");
 
 class Server {
   constructor() {
@@ -34,7 +33,7 @@ class Server {
 
     this.app.use(paths.auth, AuthRoutes);
     this.app.use(paths.country, CountryRoutes);
-    // this.app.use()
+    this.app.use(paths.market, MarketRoutes)
   }
 
   listen() {

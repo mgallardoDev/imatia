@@ -1,6 +1,6 @@
 const { request, response } = require("express");
 const { redisClient } = require("../helpers/redis.controller");
-const CountryService = require("../services/contry.service");
+const {CountryService }= require("../services");
 
 const countryService = new CountryService();
 
@@ -32,14 +32,42 @@ const getCountryById = async (req, res) => {
       status: "ok",
       msg: "País recibido correctamente",
       payload: {
-        country,
+        country: {
+          countryName: country.countryName,
+          iso: country.iso,
+          _id: country._id,
+        },
       },
     });
   } catch (err) {
     console.error(err);
     return res.status(400).json({
       status: "error",
-      msg: "No se encuentra un país con esa ID",
+      msg: "Error buscando país",
+    });
+  }
+};
+
+const getCountryByIso = async (req, res) => {
+  try {
+    const { iso } = req.params;
+    const country = await countryService.getFilteredCountry({ iso: iso.toUpperCase() });
+    return res.status(200).json({
+      status: "ok",
+      msg: "País recibido correctamente",
+      payload: {
+        country: {
+          countryName: country.countryName,
+          iso: country.iso,
+          _id: country._id,
+        },
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(400).json({
+      status: "error",
+      msg: "Error buscando país",
     });
   }
 };
@@ -118,4 +146,5 @@ module.exports = {
   createCoutry,
   updateCountry,
   deleteCountry,
+  getCountryByIso,
 };
