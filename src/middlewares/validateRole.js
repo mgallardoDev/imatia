@@ -9,7 +9,6 @@ const validateRole = (rolesArray) => {
     }
 
     const { role } = req.user;
-    console.log(req.user)
     if (rolesArray.includes(role)) {
       console.log("Control de acceso: OK");
       next();

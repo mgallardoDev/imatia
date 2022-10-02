@@ -16,7 +16,6 @@ const validateJWT = async (req = request, res = response, next) => {
       token,
       process.env.SECRETORPRIVATEKEY
     );
-    console.log(username, role);
     if (!username) {
       return res.status(401).json({
         msg: "Token no válido - usuario no existe",

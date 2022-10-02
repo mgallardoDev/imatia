@@ -35,7 +35,6 @@ class CountryService {
 
   async updateCountry(id, modifiedCountry) {
     const country = await Country.findById(id)
-    console.log(country)
     country.iso = modifiedCountry.iso
     country.countryName = modifiedCountry.countryName
 

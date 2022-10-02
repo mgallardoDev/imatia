@@ -1,4 +1,5 @@
 const { request, response } = require("express");
+const { redisClient } = require("../helpers/redis.controller");
 const CountryService = require("../services/contry.service");
 
 const countryService = new CountryService();
@@ -6,7 +7,7 @@ const countryService = new CountryService();
 const getCountries = async (req, res) => {
   try {
     const countries = await countryService.getCountries();
-
+    redisClient.setEx("countryList", 5, JSON.stringify(countries));
     return res.status(200).json({
       status: "ok",
       msg: "Paises recibidos correctamente",
@@ -46,7 +47,10 @@ const getCountryById = async (req, res) => {
 const createCoutry = async (req, res) => {
   try {
     const { iso, countryName } = req.body;
-    const savedCountry = await countryService.createCountry(iso.toUpperCase(), countryName);
+    const savedCountry = await countryService.createCountry(
+      iso.toUpperCase(),
+      countryName
+    );
     return res.status(200).json({
       status: "ok",
       msg: "País creado correctamente",
@@ -79,7 +83,7 @@ const updateCountry = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return res.status(400).json({
       status: "error",
       msg: "Error al actualizar país",
@@ -108,4 +112,10 @@ const deleteCountry = async (req, res) => {
   }
 };
 
-module.exports = { getCountries, getCountryById, createCoutry, updateCountry, deleteCountry };
+module.exports = {
+  getCountries,
+  getCountryById,
+  createCoutry,
+  updateCountry,
+  deleteCountry,
+};

@@ -5,6 +5,7 @@ const {
   validateJWT,
   validateRole,
   validateFieldValue,
+  redisCache,
 } = require("../middlewares");
 const {
   getCountries,
@@ -74,7 +75,7 @@ const router = Router();
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
-router.get("/", [validateJWT], getCountries);
+router.get("/", [validateJWT, redisCache('countryList')], getCountries);
 
 /**
  * @swagger
