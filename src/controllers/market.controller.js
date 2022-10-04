@@ -50,11 +50,11 @@ const getMarketById = async (req, res) => {
 const createMarket = async (req, res) => {
   try {
     const { code, marketName, countries } = req.body;
-    const savedMarket = await marketService.createMarket(
-      code.toUpperCase(),
+    const savedMarket = await marketService.createMarket({
+      code: code.toUpperCase(),
       marketName,
-      countries
-    );
+      countries,
+    });
     return res.status(200).json({
       status: "ok",
       msg: "Mercado creado correctamente",
@@ -71,6 +71,31 @@ const createMarket = async (req, res) => {
   }
 };
 
+const updateMarket = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { code, marketName, countries } = req.body;
+    console.log(req.body);
+    const updatedMarket = await marketService.updateMarket(id, {
+      code,
+      marketName,
+      countries,
+    });
+    return res.status(200).json({
+      status: "ok",
+      msg: "Mercado actualizado correctamente",
+      payload: {
+        updatedMarket,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({
+      status: "error",
+      msg: error,
+    });
+  }
+};
 
 const deleteMarket = async (req, res) => {
   try {
@@ -94,4 +119,10 @@ const deleteMarket = async (req, res) => {
     });
   }
 };
-module.exports = { getMarkets, getMarketById, createMarket, deleteMarket };
+module.exports = {
+  getMarkets,
+  getMarketById,
+  createMarket,
+  deleteMarket,
+  updateMarket,
+};

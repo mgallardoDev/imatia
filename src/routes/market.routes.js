@@ -5,11 +5,18 @@ const {
   getMarketById,
   createMarket,
   deleteMarket,
+  updateMarket,
 } = require("../controllers/market.controller");
-const { validateJWT, validateRole, validate, redisCache } = require("../middlewares");
+const {
+  validateJWT,
+  validateRole,
+  validate,
+  redisCache,
+} = require("../middlewares");
 const { redisCacheWithIdParam } = require("../middlewares/cache");
 const {
-  validateArrayFieldValues, validateFieldValue,
+  validateArrayFieldValues,
+  validateFieldValue,
 } = require("../middlewares/validateFieldValue");
 const { Market, Country } = require("../models");
 
@@ -32,7 +39,8 @@ module.exports = router;
  *          countries:
  *               type: array
  *               items:
- *                  $ref: '#/components/schemas/Country'
+ *                  type: string
+ *               description: Arry con isos de los paises que forman el mercado. Estos deben exisstir en la coleccion countries.
  *      required:
  *          - code
  *          - marketName
@@ -106,7 +114,11 @@ router.get("/", [validateJWT, redisCache("marketList")], getMarkets);
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
-router.get("/:id", [validateJWT, redisCacheWithIdParam("market")], getMarketById);
+router.get(
+  "/:id",
+  [validateJWT, redisCacheWithIdParam("market")],
+  getMarketById
+);
 
 /**
  * @swagger
@@ -123,7 +135,7 @@ router.get("/:id", [validateJWT, redisCacheWithIdParam("market")], getMarketById
  *              $ref: '#/components/schemas/Market'
  *            example:
  *              code: UE
- *              marketName: Unión Europea   
+ *              marketName: Unión Europea
  *              countries: ['ES', 'PT', 'IT']
  *      security:
  *        - bearerAuth: []
@@ -149,7 +161,7 @@ router.get("/:id", [validateJWT, redisCacheWithIdParam("market")], getMarketById
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
- 
+
 router.post(
   "/",
   [
@@ -180,8 +192,78 @@ router.post(
     }),
   ],
   createMarket
-);
-
+  );
+  
+  /**
+ * @swagger
+ *  /api/market/{id}:
+ *    put:
+ *      tags: [
+ *        market
+ *      ]
+ *      summary: edición de un mercado (Solo admin)
+ *      parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 6338302aa8d639a000df7741
+ *         description: id de mongo del mercado a buscar
+ *      requestBody:
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/Market'
+ *            example:
+ *              code: TEST
+ *              marketName: testMercado
+ *              countries: [ES, CH]
+ *      security:
+ *        - bearerAuth: []
+ *      responses:
+ *        '200':
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  status:
+ *                    type: string
+ *                  msg:
+ *                    type: string
+ *                  payload:
+ *                    type: object
+ *                    properties:
+ *                      market:
+ *                         $ref: '#/components/schemas/Market'
+ *        '401':
+ *          $ref: '#/components/responses/UnauthorizedError'
+ *
+ */
+  router.put(
+    "/:id",
+    [
+      validateJWT,
+      validateRole(["admin"]),
+      check("id", "No es un identificador válido").isMongoId(),
+      check("code", "El código del mercado es obligatorio").not().isEmpty(),
+      check("marketName", "El nombre del mercado es obligatorio")
+        .not()
+        .isEmpty(),
+      check(
+        "code",
+        "El código de mercado debe tener una longitu de entre 2 y 5 caracteres"
+      ).isLength({ min: 2, max: 5 }),
+      check(
+        "countries.*",
+        "Todos los isos deben tener una longitud de 2 caracteres"
+      ).isLength({ min: 2, max: 2 }),
+      validate,
+    ],
+    updateMarket
+  );
+  
 /**
  * @swagger
  *  /api/market/{id}:
@@ -227,5 +309,6 @@ router.delete(
   ],
   deleteMarket
 );
+
 
 // TODO en getmarkets aplicar redis y preparar el helper que crea los filtro desde los queryparams

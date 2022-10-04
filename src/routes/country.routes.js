@@ -63,7 +63,7 @@ const router = Router();
  *                      countries:
  *                        type: array
  *                        items:
- *                          $ref: '#/components/responses/Country'
+ *                          $ref: '#/components/schemas/Country'
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
@@ -196,7 +196,7 @@ router.get(
  *                        type: object
  *                        properties:
  *                          country:
- *                            $ref: '#/components/responses/Country'
+ *                            $ref: '#/components/schemas/Country'
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  *
@@ -266,7 +266,7 @@ router.post(
  *                    type: object
  *                    properties:
  *                      country:
- *                         $ref: '#/components/responses/Country'
+ *                         $ref: '#/components/schemas/Country'
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  *
@@ -323,7 +323,7 @@ router.put(
  *                    type: object
  *                    properties:
  *                      country:
- *                         $ref: '#/components/responses/Country'
+ *                         $ref: '#/components/schemas/Country'
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  *
