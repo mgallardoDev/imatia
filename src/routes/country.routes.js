@@ -28,21 +28,22 @@ const router = Router();
  *      properties:
  *          countryName:
  *              type: string
- *              description: name of the country
  *          iso:
  *              type: string
  *              description: ISO 3166-1 alfa-2 code od the country
  *      required:
  *          - iso
  *          - countryName
-
  */
 
 /**
  * @swagger
  *  /api/country:
  *    get:
- *      summary: listado de todos los paises
+ *      tags: [
+ *        country
+ *      ]
+ *      summary: listado de todos los paises (REDIS CACHE)
  *      security:
  *        - bearerAuth: []
  *      responses:
@@ -55,37 +56,30 @@ const router = Router();
  *                  status:
  *                    type: string
  *                  msg:
- *                    type: string  
+ *                    type: string
  *                  payload:
  *                    type: object
  *                    properties:
  *                      countries:
  *                        type: array
- *                        items: 
- *                          type: object
- *                          properties:
- *                            country:
- *                              type: object
- *                              properties:
- *                               iso: 
- *                                type: string
- *                               countryname: 
- *                                type: string
- *                               _id:
- *                                type: string
+ *                        items:
+ *                          $ref: '#/components/responses/Country'
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
-router.get("/", [validateJWT, redisCache('countryList')], getCountries);
+router.get("/", [validateJWT, redisCache("countryList")], getCountries);
 
 /**
  * @swagger
  *  /api/country/{id}:
  *    get:
+ *      tags: [
+ *        country
+ *      ]
  *      summary: buscar un país, por el id de mongo
  *      parameters:
  *       - in: path
- *         name: id   # Note the name is the same as in the path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -103,20 +97,10 @@ router.get("/", [validateJWT, redisCache('countryList')], getCountries);
  *                  status:
  *                    type: string
  *                  msg:
- *                    type: string  
+ *                    type: string
  *                  payload:
- *                    type: object
- *                    properties:
- *                     country:
- *                       type: object
- *                       properties:
- *                        iso: 
- *                         type: string
- *                        countryname: 
- *                         type: string
- *                        _id:
- *                         type: string
- *        '401':
+ *                    $ref: '#/components/schemas/Country'
+ *        '400':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
 router.get(
@@ -133,10 +117,13 @@ router.get(
  * @swagger
  *  /api/country/iso/{iso}:
  *    get:
+ *      tags: [
+ *        country
+ *      ]
  *      summary: buscar un país, por el código  ISO 3166-1 alfa-2
  *      parameters:
  *       - in: path
- *         name: iso   # Note the name is the same as in the path
+ *         name: iso
  *         required: true
  *         schema:
  *           type: string
@@ -154,20 +141,10 @@ router.get(
  *                  status:
  *                    type: string
  *                  msg:
- *                    type: string  
+ *                    type: string
  *                  payload:
- *                    type: object
- *                    properties:
- *                      country:
- *                        type: object
- *                        properties:
- *                         iso: 
- *                          type: string
- *                         countryname: 
- *                          type: string
- *                         _id:
- *                          type: string
- *        '401':
+ *                    $ref: '#/components/schemas/Country'
+ *        '400':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
 router.get(
@@ -176,16 +153,20 @@ router.get(
     validateJWT,
     check(
       "iso",
-      "El código ISO 3166-1 alfa-2 del país tiene que estar compuesto por dos caracteres alfabéticos.").isLength({min:2, max:2}),
-    validate
+      "El código ISO 3166-1 alfa-2 del país tiene que estar compuesto por dos caracteres alfabéticos."
+    ).isLength({ min: 2, max: 2 }),
+    validate,
   ],
   getCountryByIso
-)
+);
 
 /**
  * @swagger
  *  /api/country/:
  *    post:
+ *      tags: [
+ *        country
+ *      ]
  *      summary: creación de un país (Solo admin)
  *      requestBody:
  *        content:
@@ -207,7 +188,7 @@ router.get(
  *                  status:
  *                    type: string
  *                  msg:
- *                    type: string  
+ *                    type: string
  *                  payload:
  *                    type: object
  *                    properties:
@@ -215,14 +196,7 @@ router.get(
  *                        type: object
  *                        properties:
  *                          country:
- *                            type: object
- *                            properties:
- *                             iso: 
- *                              type: string
- *                             countryname: 
- *                              type: string
- *                             _id:
- *                              type: string
+ *                            $ref: '#/components/responses/Country'
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  *
@@ -240,9 +214,13 @@ router.post(
       "El código ISO 3166-1 alfa-2 del país tiene que estar compuesto por dos caracteres alfabéticos."
     ).isLength({ min: 2, max: 2 }),
     check("countryName", "El nombre es obligatorio").not().isEmpty(),
-    validateFieldValue("countryName", Country),
-    validateFieldValue("iso", Country),
     validate,
+    validateFieldValue({
+      field: "countryName",
+      model: Country,
+      mustExist: false,
+    }),
+    validateFieldValue({ field: "iso", model: Country, mustExist: false }),
   ],
   createCoutry
 );
@@ -251,10 +229,13 @@ router.post(
  * @swagger
  *  /api/country/{id}:
  *    put:
+ *      tags: [
+ *        country
+ *      ]
  *      summary: edición de un país (Solo admin)
  *      parameters:
  *       - in: path
- *         name: id   # Note the name is the same as in the path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -280,22 +261,12 @@ router.post(
  *                  status:
  *                    type: string
  *                  msg:
- *                    type: string  
+ *                    type: string
  *                  payload:
  *                    type: object
  *                    properties:
  *                      country:
- *                        type: object
- *                        properties:
- *                          updatedCountry:
- *                            type: object
- *                            properties:
- *                             iso: 
- *                              type: string
- *                             countryname: 
- *                              type: string
- *                             _id:
- *                              type: string
+ *                         $ref: '#/components/responses/Country'
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  *
@@ -323,10 +294,13 @@ router.put(
  * @swagger
  *  /api/country/{id}:
  *    delete:
+ *      tags: [
+ *        country
+ *      ]
  *      summary: borra un país (Solo admin)
  *      parameters:
  *       - in: path
- *         name: id   # Note the name is the same as in the path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
@@ -344,22 +318,12 @@ router.put(
  *                  status:
  *                    type: string
  *                  msg:
- *                    type: string  
+ *                    type: string
  *                  payload:
  *                    type: object
  *                    properties:
  *                      country:
- *                        type: object
- *                        properties:
- *                          country:
- *                            type: object
- *                            properties:
- *                             iso: 
- *                              type: string
- *                             countryname: 
- *                              type: string
- *                             _id:
- *                              type: string
+ *                         $ref: '#/components/responses/Country'
  *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  *

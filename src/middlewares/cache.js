@@ -17,6 +17,24 @@ const redisCache = (key) => {
   };
 };
 
+const redisCacheWithIdParam = (key) => {
+  return async (req, res, next) => {
+    const {id}  = req.params
+    const value = await redisClient.get(key+id);
+    if (value) {
+      console.log("SI hay en cache");
+      res.status(200).json({
+        status: "ok",
+        msg: "from cache",
+        payload: JSON.parse(value),
+      });
+    } else {
+      console.log("NO hay en cache");
+      next();
+    }
+  };
+};
+
 /**
  *
  * CODIGO NO VALIDO PARA LA VERSION 4 de REDIS
@@ -42,4 +60,4 @@ const redisCache = (key) => {
 //   };
 // };
 
-module.exports = { redisCache };
+module.exports = { redisCache, redisCacheWithIdParam };

@@ -57,7 +57,7 @@ class CountryService {
     if (deleted) {
       return deleted;
     }
-    throw new Error();
+    throw new Error("Error al eleminar el país");
   }
 }
 

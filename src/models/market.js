@@ -12,9 +12,15 @@ const MarketSchema = Schema({
     unique: true,
   },
   countries: {
-      type: [Schema.Types.ObjectId],
-      ref: "Country",
-      default: []
+
+      //Descartado porq ue no me di cuenta que en el pdf especificaban que seria un array de isos.
+      // type: [Schema.Types.ObjectId],
+      // ref: "Country",
+      // default: []
+    
+    type: [String],
+    required: [true, "El código del país es obligatorio"],
+    default: []
   },
 });
 
