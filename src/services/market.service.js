@@ -1,4 +1,6 @@
+const CountryDto = require("../dtos/country.dto");
 const { Market } = require("../models");
+const emitter = new require("events").EventEmitter();
 const country = require("../models/country");
 const market = require("../models/market");
 
@@ -21,20 +23,20 @@ class MarketService {
     throw new Error("Mercado no encontrado");
   }
 
-  async createMarket(newMarket) {
-    const savedMarket = new Market(newMarket).save();
+  async createMarket(marketDto) {
+    const savedMarket = new Market(marketDto).save();
     if (savedMarket) {
       return savedMarket;
     }
     throw new Error("No se ha podido crear el mercado");
   }
 
-  async updateMarket(id, updatedMarket) {
-    const marketToUpdate = await Market.findById(id);
-
-    Object.assign(marketToUpdate, updatedMarket);
-
-    const savedMarket = marketToUpdate.save();
+  async updateMarket(id, modifiedMarket) {
+    const market = await Market.findById(id);
+    modifiedMarket.code ? market.code = modifiedMarket.code : null;
+    modifiedMarket.name ? market.name = modifiedMarket.name : null;
+    modifiedMarket.countries ? market.countries = modifiedMarket.countries : null;
+    const savedMarket = market.save();
     if (savedMarket) {
       return savedMarket;
     }
@@ -45,6 +47,8 @@ class MarketService {
     const deleted = await Market.findByIdAndRemove(id);
     if (deleted) {
       return deleted;
+      
+
     }
     throw new Error("Error al eleminar el mercado");
   }

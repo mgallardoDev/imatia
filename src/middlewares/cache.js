@@ -4,14 +4,12 @@ const redisCache = (key) => {
   return async (req, res, next) => {
     const value = await redisClient.get(key);
     if (value) {
-      console.log("SI hay en cache");
       res.status(200).json({
         status: "ok",
         msg: "from cache",
         payload: JSON.parse(value),
       });
     } else {
-      console.log("NO hay en cache");
       next();
     }
   };
@@ -22,14 +20,12 @@ const redisCacheWithIdParam = (key) => {
     const {id}  = req.params
     const value = await redisClient.get(key+id);
     if (value) {
-      console.log("SI hay en cache");
       res.status(200).json({
         status: "ok",
         msg: "from cache",
         payload: JSON.parse(value),
       });
     } else {
-      console.log("NO hay en cache");
       next();
     }
   };

@@ -1,10 +1,9 @@
 const express = require("express");
 
-
 const { paths } = require("../config/paths");
-const { AuthRoutes, CountryRoutes, MarketRoutes } = require("../routes");
+const { AuthRoutes, CountryRoutes, MarketRoutes, SalesRoutes } = require("../routes");
 const { dbConection } = require("../helpers/mongoDB.controller");
-const {  swaggerDocs } = require("../config/swagger");
+const { swaggerDocs } = require("../config/swagger");
 
 class Server {
   constructor() {
@@ -15,12 +14,11 @@ class Server {
     this.middlewares();
     this.routes();
 
-    swaggerDocs(this.app, this.port)
+    swaggerDocs(this.app, this.port);
   }
 
   middlewares() {
     this.app.use(express.json());
-
   }
 
   routes() {
@@ -33,7 +31,8 @@ class Server {
 
     this.app.use(paths.auth, AuthRoutes);
     this.app.use(paths.country, CountryRoutes);
-    this.app.use(paths.market, MarketRoutes)
+    this.app.use(paths.market, MarketRoutes);
+    this.app.use(paths.sales, SalesRoutes)
   }
 
   listen() {

@@ -1,7 +1,7 @@
 const { Schema, model } = require("mongoose");
 
 const CountrySchema = Schema({
-  countryName: {
+  name: {
     type: String,
     required: [true, "El nombre del país es obligatorio"],
     unique: true,

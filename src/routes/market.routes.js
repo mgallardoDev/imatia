@@ -31,7 +31,7 @@ module.exports = router;
  *    Market:
  *      type: object
  *      properties:
- *          marketName:
+ *          name:
  *              type: string
  *          code:
  *              type: string
@@ -43,7 +43,7 @@ module.exports = router;
  *               description: Arry con isos de los paises que forman el mercado. Estos deben exisstir en la coleccion countries.
  *      required:
  *          - code
- *          - marketName
+ *          - name
  *          - countries
  */
 
@@ -135,7 +135,7 @@ router.get(
  *              $ref: '#/components/schemas/Market'
  *            example:
  *              code: UE
- *              marketName: Unión Europea
+ *              name: Unión Europea
  *              countries: ['ES', 'PT', 'IT']
  *      security:
  *        - bearerAuth: []
@@ -168,11 +168,21 @@ router.post(
     validateJWT,
     validateRole("admin"),
     check("code", "El código del mercado es obligatorio").not().isEmpty(),
-    check("marketName", "El nombre del mercado es obligatorio").not().isEmpty(),
+    check("code", "El código del mercado debe ser un string").isString(),
+    check("name", "El nombre del mercado es obligatorio").not().isEmpty(),
+    check("name", "El nombre del mercado debe ser un string").isString(),
     check(
       "code",
       "El código de mercado debe tener una longitu de entre 2 y 5 caracteres"
     ).isLength({ min: 2, max: 5 }),
+    check(
+      "countries",
+      "El listado de paises miembros, debe ser un array"
+    ).isArray(),
+    check(
+      "countries.*",
+      "Todos los elementos deben ser de tipo string"
+    ).isString(),
     check(
       "countries.*",
       "Todos los isos deben tener una longitud de 2 caracteres"
@@ -180,7 +190,7 @@ router.post(
     validate,
     validateFieldValue({ field: "code", model: Market, mustExist: false }),
     validateFieldValue({
-      field: "marketName",
+      field: "name",
       model: Market,
       mustExist: false,
     }),
@@ -192,9 +202,9 @@ router.post(
     }),
   ],
   createMarket
-  );
-  
-  /**
+);
+
+/**
  * @swagger
  *  /api/market/{id}:
  *    put:
@@ -217,7 +227,7 @@ router.post(
  *              $ref: '#/components/schemas/Market'
  *            example:
  *              code: TEST
- *              marketName: testMercado
+ *              name: testMercado
  *              countries: [ES, CH]
  *      security:
  *        - bearerAuth: []
@@ -241,29 +251,36 @@ router.post(
  *          $ref: '#/components/responses/UnauthorizedError'
  *
  */
-  router.put(
-    "/:id",
-    [
-      validateJWT,
-      validateRole(["admin"]),
-      check("id", "No es un identificador válido").isMongoId(),
-      check("code", "El código del mercado es obligatorio").not().isEmpty(),
-      check("marketName", "El nombre del mercado es obligatorio")
-        .not()
-        .isEmpty(),
-      check(
-        "code",
-        "El código de mercado debe tener una longitu de entre 2 y 5 caracteres"
-      ).isLength({ min: 2, max: 5 }),
-      check(
-        "countries.*",
-        "Todos los isos deben tener una longitud de 2 caracteres"
-      ).isLength({ min: 2, max: 2 }),
-      validate,
-    ],
-    updateMarket
-  );
-  
+router.put(
+  "/:id",
+  [
+    validateJWT,
+    validateRole(["admin"]),
+    check("id", "No es un identificador válido").isMongoId(),
+    check(
+      "code",
+      "El código de mercado debe tener una longitu de entre 2 y 5 caracteres"
+    )
+      .if(check("code").exists())
+      .isString()
+      .isLength({ min: 2, max: 5 }),
+    check("name", "El nombre de mercado debe ser un string")
+      .if(check("name").exists())
+      .isString(),
+    check("countries", "Countries tiene que ser un array").if(
+      check("countries").exists().isArray()
+    ),
+    check(
+      "countries.*",
+      "Todos los isos deben tener una longitud de 2 caracteres"
+    )
+      .if(check("countries").exists())
+      .isLength({ min: 2, max: 2 }),
+    validate,
+  ],
+  updateMarket
+);
+
 /**
  * @swagger
  *  /api/market/{id}:
@@ -309,6 +326,3 @@ router.delete(
   ],
   deleteMarket
 );
-
-
-// TODO en getmarkets aplicar redis y preparar el helper que crea los filtro desde los queryparams

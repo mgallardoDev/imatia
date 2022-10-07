@@ -1,0 +1,93 @@
+[
+    {
+        "date": "2022-01-15",
+        "ref": "a",
+        "iso": "ES",
+        "transCode": 0,
+        "units": 5
+    },
+    {
+        "date": "2022-02-15",
+        "ref": "b",
+        "iso": "CO",
+        "transCode": 0,
+        "units": 3
+    },
+    {
+        "date": "2022-03-15",
+        "ref": "a",
+        "iso": "ES",
+        "transCode": 0,
+        "units": 1
+    },
+    {
+        "date": "2022-04-15",
+        "ref": "a",
+        "iso": "PT",
+        "transCode": 1,
+        "units": 7
+    },
+    {
+        "date": "2022-05-15",
+        "ref": "b",
+        "iso": "PT",
+        "transCode": 1,
+        "units": 10
+    },
+    {
+        "date": "2022-06-15",
+        "ref": "a",
+        "iso": "VE",
+        "transCode": 0,
+        "units": 1
+    },
+    {
+        "date": "2022-07-15",
+        "ref": "c",
+        "iso": "VE",
+        "transCode": 0,
+        "units": 5
+    },
+    {
+        "date": "2022-08-15",
+        "ref": "b",
+        "iso": "ES",
+        "transCode": 1,
+        "units": 2
+    },
+    {
+        "date": "2022-09-15",
+        "ref": "b",
+        "iso": "ZI",
+        "transCode": 0,
+        "units": 5
+    },
+    {
+        "date": "2022-10-15",
+        "ref": "a",
+        "iso": "ES",
+        "transCode": 0,
+        "units": 5
+    },
+    {
+        "date": "2022-12-15",
+        "ref": "a",
+        "iso": "PT",
+        "transCode": 1,
+        "units": 6
+    },
+    {
+        "date": "2022-12-20",
+        "ref": "d",
+        "iso": "ES",
+        "transCode": 1,
+        "units": 4
+    },
+    {
+        "date": "2022-12-22",
+        "ref": "a",
+        "iso": "ES",
+        "transCode": 0,
+        "units": 3
+    }
+]

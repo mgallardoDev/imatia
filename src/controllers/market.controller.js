@@ -1,3 +1,4 @@
+const MarketDto = require("../dtos/market.dto");
 const { redisClient } = require("../helpers/redis.controller");
 const { MarketService } = require("../services");
 
@@ -33,7 +34,7 @@ const getMarketById = async (req, res) => {
       msg: "Mercados recibidos correctamente",
       payload: {
         code: market.code,
-        marketName: market.marketName,
+        name: market.name,
         countries: market.countries,
         _id: market._id,
       },
@@ -49,12 +50,8 @@ const getMarketById = async (req, res) => {
 
 const createMarket = async (req, res) => {
   try {
-    const { code, marketName, countries } = req.body;
-    const savedMarket = await marketService.createMarket({
-      code: code.toUpperCase(),
-      marketName,
-      countries,
-    });
+    const body= req.body;
+    const savedMarket = await marketService.createMarket(new MarketDto(body));
     return res.status(200).json({
       status: "ok",
       msg: "Mercado creado correctamente",
@@ -74,13 +71,8 @@ const createMarket = async (req, res) => {
 const updateMarket = async (req, res) => {
   try {
     const { id } = req.params;
-    const { code, marketName, countries } = req.body;
-    console.log(req.body);
-    const updatedMarket = await marketService.updateMarket(id, {
-      code,
-      marketName,
-      countries,
-    });
+    const body= req.body;
+    const updatedMarket = await marketService.updateMarket(id, new MarketDto(body));
     return res.status(200).json({
       status: "ok",
       msg: "Mercado actualizado correctamente",
@@ -106,7 +98,7 @@ const deleteMarket = async (req, res) => {
       msg: "Mercado eliminado correctamente",
       payload: {
         code: market.code,
-        marketName: market.marketName,
+        name: market.name,
         countries: market.countries,
         _id: market._id,
       },

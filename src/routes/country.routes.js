@@ -16,6 +16,7 @@ const {
   getCountryByIso,
 } = require("../controllers/country.controller");
 const { Country } = require("../models");
+const { redisCacheWithIdParam } = require("../middlewares/cache");
 
 const router = Router();
 
@@ -26,14 +27,14 @@ const router = Router();
  *    Country:
  *      type: object
  *      properties:
- *          countryName:
+ *          name:
  *              type: string
  *          iso:
  *              type: string
- *              description: ISO 3166-1 alfa-2 code od the country
+ *              description: código ISO 3166-1 alfa-2 del país
  *      required:
  *          - iso
- *          - countryName
+ *          - name
  */
 
 /**
@@ -76,7 +77,7 @@ router.get("/", [validateJWT, redisCache("countryList")], getCountries);
  *      tags: [
  *        country
  *      ]
- *      summary: buscar un país, por el id de mongo
+ *      summary: buscar un país, por el id de mongo (REDIS CACHE)
  *      parameters:
  *       - in: path
  *         name: id
@@ -100,7 +101,7 @@ router.get("/", [validateJWT, redisCache("countryList")], getCountries);
  *                    type: string
  *                  payload:
  *                    $ref: '#/components/schemas/Country'
- *        '400':
+ *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
 router.get(
@@ -109,6 +110,7 @@ router.get(
     validateJWT,
     check("id", "No es un identificador válido").isMongoId(),
     validate,
+    redisCacheWithIdParam("country"),
   ],
   getCountryById
 );
@@ -144,7 +146,7 @@ router.get(
  *                    type: string
  *                  payload:
  *                    $ref: '#/components/schemas/Country'
- *        '400':
+ *        '401':
  *          $ref: '#/components/responses/UnauthorizedError'
  */
 router.get(
@@ -175,7 +177,7 @@ router.get(
  *              $ref: '#/components/schemas/Country'
  *            example:
  *              iso: VE
- *              countryName: Venezuela
+ *              name: Venezuela
  *      security:
  *        - bearerAuth: []
  *      responses:
@@ -213,10 +215,10 @@ router.post(
       "iso",
       "El código ISO 3166-1 alfa-2 del país tiene que estar compuesto por dos caracteres alfabéticos."
     ).isLength({ min: 2, max: 2 }),
-    check("countryName", "El nombre es obligatorio").not().isEmpty(),
+    check("name", "El nombre es obligatorio").not().isEmpty(),
     validate,
     validateFieldValue({
-      field: "countryName",
+      field: "name",
       model: Country,
       mustExist: false,
     }),
@@ -248,7 +250,7 @@ router.post(
  *              $ref: '#/components/schemas/Country'
  *            example:
  *              iso: VE
- *              countryName: VVenezuela
+ *              name: VVenezuela
  *      security:
  *        - bearerAuth: []
  *      responses:
@@ -277,14 +279,13 @@ router.put(
     validateJWT,
     validateRole(["admin"]),
     check("id", "No es un identificador válido").isMongoId(),
-    check("countryName", "El nombre es obligatorio").not().isEmpty(),
-    check("iso", "El código ISO 3166-1 alfa-2 del país es obligatorio")
-      .not()
-      .isEmpty(),
     check(
       "iso",
       "El código ISO 3166-1 alfa-2 del país tiene que estar compuesto por dos caracteres alfabéticos."
-    ).isLength({ min: 2, max: 2 }),
+    )
+      .if(check("iso").exists())
+      .isString()
+      .isLength({ min: 2, max: 2 }),
     validate,
   ],
   updateCountry
@@ -297,7 +298,7 @@ router.put(
  *      tags: [
  *        country
  *      ]
- *      summary: borra un país (Solo admin)
+ *      summary: borra un país. Al eliminarlo es eliminado tb de todos los mercados en los que se encuentra (Solo admin)
  *      parameters:
  *       - in: path
  *         name: id

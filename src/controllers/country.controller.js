@@ -1,4 +1,5 @@
 const { request, response } = require("express");
+const CountryDto = require("../dtos/country.dto");
 const { redisClient } = require("../helpers/redis.controller");
 const { CountryService } = require("../services");
 
@@ -28,11 +29,12 @@ const getCountryById = async (req, res) => {
   try {
     const { id } = req.params;
     const country = await countryService.getCountryById(id);
+    redisClient.setEx("country" + id, 5, JSON.stringify(market));
     return res.status(200).json({
       status: "ok",
       msg: "País recibido correctamente",
       payload: {
-        countryName: country.countryName,
+        name: country.name,
         iso: country.iso,
         _id: country._id,
       },
@@ -56,7 +58,7 @@ const getCountryByIso = async (req, res) => {
       status: "ok",
       msg: "País recibido correctamente",
       payload: {
-        countryName: country.countryName,
+        name: country.name,
         iso: country.iso,
         _id: country._id,
       },
@@ -72,10 +74,9 @@ const getCountryByIso = async (req, res) => {
 
 const createCoutry = async (req, res) => {
   try {
-    const { iso, countryName } = req.body;
+    const body = req.body;
     const savedCountry = await countryService.createCountry(
-      iso.toUpperCase(),
-      countryName
+      new CountryDto(body)
     );
     return res.status(200).json({
       status: "ok",
@@ -96,11 +97,8 @@ const createCoutry = async (req, res) => {
 const updateCountry = async (req, res) => {
   try {
     const { id } = req.params;
-    const { iso, countryName } = req.body;
-    const updatedCountry = await countryService.updateCountry(id, {
-      iso,
-      countryName,
-    });
+    const body = req.body;
+    const updatedCountry = await countryService.updateCountry(id, new CountryDto(body));
     return res.status(200).json({
       status: "ok",
       msg: "País actualizado correctamente",
@@ -109,12 +107,11 @@ const updateCountry = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res.status(400).json({
       status: "error",
       msg: "Error al actualizar país",
     });
-    console.log(err);
   }
 };
 

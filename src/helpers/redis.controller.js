@@ -5,7 +5,6 @@ const redisClient = createClient({
 });
 
 (async () => {
-  console.log("conecct");
   await redisClient.connect();
 })();
 

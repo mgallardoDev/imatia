@@ -1,5 +1,6 @@
 const { sanitizeFilter } = require("mongoose");
-const { Country } = require("../models");
+const { Country, Market } = require("../models");
+const { find } = require("../models/country");
 
 class CountryService {
   constructor() {}
@@ -27,11 +28,8 @@ class CountryService {
     }
     throw new Error("País no encontrado");
   }
-  async createCountry(iso, countryName) {
-    const savedCountry = await new Country({
-      iso,
-      countryName,
-    }).save();
+  async createCountry(countryDto) {
+    const savedCountry = await new Country(countryDto).save();
 
     if (savedCountry) {
       return savedCountry;
@@ -41,8 +39,8 @@ class CountryService {
 
   async updateCountry(id, modifiedCountry) {
     const country = await Country.findById(id);
-    country.iso = modifiedCountry.iso;
-    country.countryName = modifiedCountry.countryName;
+    modifiedCountry.iso ? (country.iso = modifiedCountry.iso) : null;
+    modifiedCountry.name ? (country.name = modifiedCountry.name) : null;
 
     const updatedCountry = country.save();
 
@@ -55,9 +53,22 @@ class CountryService {
   async deleteCountry(id) {
     const deleted = await Country.findByIdAndRemove(id);
     if (deleted) {
+      this.deleteCountryInMarkets(deleted.iso);
       return deleted;
     }
     throw new Error("Error al eleminar el país");
+  }
+
+  async deleteCountryInMarkets(iso) {
+    const markets = await Market.find({ countries: iso });
+    markets.forEach((market) => {
+      market.countries.splice(market.countries.indexOf(iso), 1);
+      const savedMarket = market.save();
+      if (savedMarket) {
+        return savedMarket;
+      }
+      throw new Error("No se ha podido actualizar el mercado");
+    });
   }
 }
 
